@@ -22,11 +22,12 @@ public class PluginLogger {
             try {
                 fileHandler =  new FileHandler(file.getAbsolutePath(),true);
                 fileHandler.setLevel(Level.INFO);
+                fileHandler.setEncoding("UTF-8");
                 fileHandler.setFormatter(new Formatter() {
                                              @Override
                                              public String format(LogRecord record) {
                                                  date.setTime(record.getMillis());
-                                                 return String.format("%1$tc %2$s %3$s \n\t",date,record.getLevel(),record.getMessage());
+                                                 return String.format("%1$tc %2$s %3$s \n",date,record.getLevel(),record.getMessage());
                                              }
                                          });
             logger.addHandler(fileHandler);
@@ -37,7 +38,7 @@ public class PluginLogger {
         return fileHandler;
     }
     public void sendConsoleMessage(String string){
-        if (debugMode) logger.info(string);
+        logger.info(string);
     }
     public void sendErrorMessage(String string){
         logger.warning(string);

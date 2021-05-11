@@ -18,15 +18,13 @@ import java.util.Map;
 import java.util.Set;
 
 
+
 public class PluginConfig<O extends JavaPlugin> {
 
     protected Map<String,FileConfiguration> configs = Maps.newHashMap();
     protected Map<String,File> configFiles = Maps.newHashMap();
     protected File dataFolder;
-
-    @Inject
-    private static PluginLogger logger;
-
+    private PluginLogger logger;
     private O instance;
 
     private PluginConfig(File dataFolder){
@@ -50,6 +48,9 @@ public class PluginConfig<O extends JavaPlugin> {
     public PluginConfig(O instance,String subFolder,String configName){
         this(new File(instance.getDataFolder()+File.separator+subFolder,configName),configName);
         this.instance = instance;
+    }
+    public void setPluginLogger(PluginLogger pluginLogger){
+        this.logger = pluginLogger;
     }
     public void addConfig(String configName){
         this.configFiles.put(configName,new File(this.dataFolder,configName+".yml"));

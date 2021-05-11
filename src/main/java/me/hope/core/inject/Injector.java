@@ -77,7 +77,7 @@ public class Injector {
             e.printStackTrace();
         }finally {
             if(injected){
-                System.out.println("[Hope's Injector<"+this.plugin.getDescription().getName()+">]: "+clazz.getName()+" inject!");
+                //System.out.println("[Hope's Injector<"+this.plugin.getDescription().getName()+">]: "+clazz.getName()+" inject!");
             }
         }
     }
@@ -88,7 +88,7 @@ public class Injector {
         public static <T extends JavaPlugin> Singleton getInstance(T plugin){
             if(!enumSingleton.containsKey(plugin)){
                 enumSingleton.put(plugin,new Singleton(plugin));
-                System.out.println("[Hope's Singleton]: "+plugin.getDescription().getName()+" is register!");
+                //System.out.println("[Hope's Singleton]: "+plugin.getDescription().getName()+" is register!");
             }
             return enumSingleton.get(plugin);
         }
@@ -100,7 +100,7 @@ public class Injector {
         private void set(Class<?> clazz, Object instance){
             if(!singleton.containsKey(clazz)){
                 singleton.put(clazz,instance);
-                System.out.println("[Hope's Singleton<"+this.plugin.getDescription().getName()+">]: <"+clazz.getName()+"> set singleton!");
+                //System.out.println("[Hope's Singleton<"+this.plugin.getDescription().getName()+">]: <"+clazz.getName()+"> set singleton!");
             }
         }
         public  <O> O get(Class<O> clazz){

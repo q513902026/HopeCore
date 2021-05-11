@@ -14,5 +14,8 @@ public class HopeCore extends JavaPlugin {
         Injector injector = new InjectorBuilder().setDefaultPath("me.hope.core").setPlugin(this).build();
         instance = injector.register(HopeCore.class,this);
         logger = injector.register(Logger.class,getLogger());
+
+        injector.injectClasses();
+        logger.info("Version:" + this.getDescription().getVersion());
     }
 }
