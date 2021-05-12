@@ -43,10 +43,12 @@ public class PluginCommandMap <O extends JavaPlugin> implements CommandExecutor 
                 for(Map.Entry<String,CommandExecutor> entry : getCommandMap().entrySet()){
                     if (args[0].equalsIgnoreCase(entry.getKey())){
                         label = entry.getKey();
+                        String[] newargs = {};
                         if (args.length >1){
-                            System.arraycopy(args,1,args,0, (args.length - 1));
+                            newargs = new String[args.length - 1];
+                            System.arraycopy(args,1,newargs,0, (args.length - 1));
                         }
-                        success = entry.getValue().onCommand(sender,command,args[0],args);
+                        success = entry.getValue().onCommand(sender,command,entry.getKey(),newargs);
                     }
                 }
             } catch (Throwable var9) {
