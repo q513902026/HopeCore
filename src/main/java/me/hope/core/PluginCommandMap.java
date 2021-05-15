@@ -11,10 +11,12 @@ import java.util.Map;
 
 public class PluginCommandMap <O extends JavaPlugin> implements CommandExecutor {
     private O instance;
+    protected Map<String, CommandExecutor> commands;
     public PluginCommandMap(O plugin){
         this.instance = plugin;
+        commands = Maps.newHashMap();
     }
-    protected static Map<String, CommandExecutor> commands = Maps.newHashMap();
+
 
     public  <T extends CommandExecutor> T getCommandExecutor(String name) {
         return (T) commands.get(name);
