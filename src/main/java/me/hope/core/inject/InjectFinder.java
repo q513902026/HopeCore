@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.JarURLConnection;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -35,6 +36,7 @@ public class InjectFinder {
                         break;
                     case "jar":
                         JarURLConnection conn = (JarURLConnection) url.openConnection();
+
                         JarFile jar = conn.getJarFile();
                         if (jar == null){
                             jar = jarfile;
@@ -45,8 +47,8 @@ public class InjectFinder {
                         break;
                 }
             }
-        }catch(IOException ignored){
-
+        }catch(IOException e){
+            classes = getClassNameFromJars(((URLClassLoader)plugin.getClass().getClassLoader()).getURLs(),rootPackage,recursive);
         }
         return classes;
     }
@@ -108,6 +110,31 @@ public class InjectFinder {
                 }
             }
         }
+    }
+
+    private static Set<Class<?>> getClassNameFromJars(URL[] urls, String packageName, boolean isRecursion) {
+        Set<Class<?>> classes = Sets.newHashSet();
+
+        for (int i = 0; i < urls.length; i++) {
+            String classPath = urls[i].getPath();
+
+            if (classPath.endsWith("classes/")) {
+                continue;
+            }
+
+            JarFile jarFile = null;
+            try {
+                jarFile = new JarFile(classPath.substring(classPath.indexOf("/")));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            if (jarFile != null) {
+                classes.addAll(findClassesByJar(packageName,jarFile, isRecursion));
+            }
+        }
+
+        return classes;
     }
     private static Class<?> getClass(String rootPackage,String className) throws ClassNotFoundException {
         Class<?> clazz = Class.forName(rootPackage + '.' + className);

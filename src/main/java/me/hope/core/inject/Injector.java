@@ -28,6 +28,7 @@ public class Injector {
         if (init){
             init = false;
             Singleton.clear(plugin);
+            //System.out.println("[Hope's Singleton]: "+plugin.getDescription().getName()+" clear cache!");
         }
         singleton = Singleton.getInstance(plugin);
     }
@@ -46,10 +47,14 @@ public class Injector {
     }
 
     public  void injectClasses(){
+        //System.out.println("[Hope's Singleton<"+this.plugin.getDescription().getName()+">]:me.hope.core injector!");
         for(Class<?> clazz : InjectFinder.getClasses(HopeCore.instance,"me.hope.core",true)){
+            //System.out.println("[Hope's Singleton<"+this.plugin.getDescription().getName()+">]: <"+clazz.getName()+"> try injectField!");
             inject(clazz);
         }
-        for(Class<?> clazz :InjectFinder.getClasses(getSingleton(plugin.getClass()),handlerPath,true)){
+        //System.out.println("[Hope's Singleton<"+this.plugin.getDescription().getName()+">]:"+handlerPath+" injector!");
+        for(Class<?> clazz :InjectFinder.getClasses(plugin,handlerPath,true)){
+            //System.out.println("[Hope's Singleton<"+this.plugin.getDescription().getName()+">]: <"+clazz.getName()+"> try injectField!");
             inject(clazz);
         }
     }
