@@ -93,7 +93,7 @@ public class PluginConfig<O extends JavaPlugin> {
     public void saveAllDefaultConfig() {
 
         for(String configName:configFiles.keySet()){
-            logger.sendConsoleMessage("load Config<"+configName+"> ...");
+            //logger.sendConsoleMessage("load Config<"+configName+"> ...");
             saveDefaultConfig(configName);
         }
         logger.sendConsoleMessage("Config is Loaded!");
