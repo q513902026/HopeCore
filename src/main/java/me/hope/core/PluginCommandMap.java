@@ -8,9 +8,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class PluginCommandMap <O extends JavaPlugin> implements CommandExecutor {
-    private O instance;
+    private final O instance;
     protected Map<String, CommandExecutor> commands;
     public PluginCommandMap(O plugin){
         this.instance = plugin;
@@ -23,9 +24,7 @@ public class PluginCommandMap <O extends JavaPlugin> implements CommandExecutor 
     }
 
     public  <T extends CommandExecutor> T registerCommand(String name, T command) {
-        T put = (T) commands.put(name, command);
-        //instance.getLogger().info("[] : 命令" + name + "注册完成.");
-        return put;
+        return (T) commands.put(name, command);
     }
 
     public Map<String, CommandExecutor> getCommandMap() {
@@ -41,16 +40,16 @@ public class PluginCommandMap <O extends JavaPlugin> implements CommandExecutor 
             return true;
         } else {
             try {
-                if (args ==null | args.length==0){ return true;}
+                if (args ==null | Objects.requireNonNull(args).length==0){ return true;}
                 for(Map.Entry<String,CommandExecutor> entry : getCommandMap().entrySet()){
                     if (args[0].equalsIgnoreCase(entry.getKey())){
                         label = entry.getKey();
-                        String[] newargs = {};
+                        String[] new_args = {};
                         if (args.length >1){
-                            newargs = new String[args.length - 1];
-                            System.arraycopy(args,1,newargs,0, (args.length - 1));
+                            new_args = new String[args.length - 1];
+                            System.arraycopy(args,1,new_args,0, (args.length - 1));
                         }
-                        success = entry.getValue().onCommand(sender,command,entry.getKey(),newargs);
+                        success = entry.getValue().onCommand(sender,command,entry.getKey(),new_args);
                     }
                 }
             } catch (Throwable var9) {

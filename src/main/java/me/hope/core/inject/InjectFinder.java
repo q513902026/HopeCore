@@ -1,7 +1,7 @@
 package me.hope.core.inject;
 
 import com.google.common.collect.Sets;
-import me.hope.core.inject.annotation.NotSinglethon;
+import me.hope.core.inject.annotation.NotSingleton;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -11,11 +11,12 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.Objects;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-@NotSinglethon
+@NotSingleton
 public class InjectFinder {
     private static JarFile jarfile;
     public static <T extends JavaPlugin> Collection<Class<?>> getClasses(T plugin, String rootPackage, boolean recursive)  {
@@ -44,7 +45,7 @@ public class InjectFinder {
                         break;
                 }
             }
-        }catch(IOException e){
+        }catch(IOException ignored){
 
         }
         return classes;
@@ -68,7 +69,7 @@ public class InjectFinder {
                     if(name.endsWith(".class") && !(jarEntry.isDirectory())){
                         String className = name.substring(rootPackage.length()+1,name.length()-6);
                         try {
-                            Class clazz = getClass(rootPackage,className);
+                            Class<?> clazz = getClass(rootPackage,className);
                             if (clazz != null){
                                 classes.add(clazz);
                             }
@@ -92,13 +93,13 @@ public class InjectFinder {
             return;
         }
         File[] dirFiles = dir.listFiles(pathname -> (recursive && pathname.isDirectory()) || (pathname.getName().endsWith(".class")));
-        for(File file:dirFiles){
+        for(File file: Objects.requireNonNull(dirFiles)){
             if(file.isDirectory()){
                 findAndAddClasses(rootPackage+"."+file.getName(),file.getAbsolutePath(),recursive,classes);
             }else{
                 String className =file.getName().substring(0,file.getName().length()-6);
                 try{
-                    Class clazz = getClass(rootPackage,className);
+                    Class<?> clazz = getClass(rootPackage,className);
                     if (clazz != null){
                         classes.add(clazz);
                     }
@@ -109,7 +110,7 @@ public class InjectFinder {
         }
     }
     private static Class<?> getClass(String rootPackage,String className) throws ClassNotFoundException {
-        Class clazz = Class.forName(rootPackage + '.' + className);
-        return clazz.isAnnotationPresent(NotSinglethon.class) ? null:clazz;
+        Class<?> clazz = Class.forName(rootPackage + '.' + className);
+        return clazz.isAnnotationPresent(NotSingleton.class) ? null:clazz;
     }
 }

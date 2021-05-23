@@ -1,11 +1,11 @@
 package me.hope.core.inject;
 
-import me.hope.core.inject.annotation.NotSinglethon;
+import me.hope.core.inject.annotation.NotSingleton;
 import org.bukkit.plugin.java.JavaPlugin;
 
-@NotSinglethon
+@NotSingleton
 public class InjectorBuilder {
-    private Injector injector;
+    private final Injector injector;
     public InjectorBuilder(){
         injector = new Injector();
     }
@@ -14,7 +14,7 @@ public class InjectorBuilder {
         return this;
     }
     public InjectorBuilder setDefaultPath(String path){
-        injector.setHanderPath(path);
+        injector.setHandlerPath(path);
         return this;
     }
     public Injector build(){

@@ -6,10 +6,10 @@ import java.util.Date;
 import java.util.logging.*;
 
 public class PluginLogger {
-    private Logger logger;
-    private File file;
+    private final Logger logger;
+    private final File file;
     private static FileHandler fileHandler;
-    private Date date = new Date();
+    private final Date date = new Date();
     private final boolean debugMode = false;
     public PluginLogger(Logger logger,File file){
         this.logger = logger;
@@ -21,7 +21,7 @@ public class PluginLogger {
         if (fileHandler == null ){
             try {
                 fileHandler =  new FileHandler(file.getAbsolutePath(),true);
-                fileHandler.setLevel(Level.INFO);
+                fileHandler.setLevel(Level.ALL);
                 fileHandler.setEncoding("UTF-8");
                 fileHandler.setFormatter(new Formatter() {
                                              @Override

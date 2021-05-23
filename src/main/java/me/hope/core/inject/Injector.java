@@ -3,20 +3,21 @@ package me.hope.core.inject;
 import com.google.common.collect.Maps;
 import me.hope.HopeCore;
 import me.hope.core.inject.annotation.Inject;
-import me.hope.core.inject.annotation.NotSinglethon;
+import me.hope.core.inject.annotation.NotSingleton;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.lang.reflect.Field;
 import java.util.Map;
 
-@NotSinglethon
+@NotSingleton
 public class Injector {
-    private  Map<Class<?>, Object> instances = Maps.newHashMap();
+    private  final Map<Class<?>, Object> instances = Maps.newHashMap();
     private  String handlerPath = "";
     private  JavaPlugin plugin;
-    private  Singleton singleton;
+    private  Singleton<? extends JavaPlugin> singleton;
+    private  boolean init = true;
 
-    public void setHanderPath(String path){
+    public void setHandlerPath(String path){
         handlerPath = path;
     }
 
@@ -24,9 +25,13 @@ public class Injector {
         this.plugin = plugin;
     }
     public void reloadSingleton(){
+        if (init){
+            init = false;
+            Singleton.clear(plugin);
+        }
         singleton = Singleton.getInstance(plugin);
     }
-    public  <T extends Object> T register(Class<T> clazz, T instance) {
+    public  <T> T register(Class<T> clazz, T instance) {
         provide(instance);
         instances.put(clazz, instance);
         return instance;
@@ -37,28 +42,28 @@ public class Injector {
     }
 
     public  <O> O getSingleton(Class<O> clazz){
-        return (O) singleton.get(clazz);
+        return singleton.get(clazz);
     }
 
     public  void injectClasses(){
-        for(Class clazz : InjectFinder.getClasses(HopeCore.instance,"me.hope.core",true)){
+        for(Class<?> clazz : InjectFinder.getClasses(HopeCore.instance,"me.hope.core",true)){
             inject(clazz);
         }
-        for(Class clazz :InjectFinder.getClasses(getSingleton(plugin.getClass()),handlerPath,true)){
+        for(Class<?> clazz :InjectFinder.getClasses(getSingleton(plugin.getClass()),handlerPath,true)){
             inject(clazz);
         }
     }
-    public  void inject(Class clazz){
+    public  void inject(Class<?> clazz){
         Object instance = getSingleton(clazz);
-        injectFields(instance ==null?null:instance,clazz);
+        injectFields(instance,clazz);
     }
+
     public  void inject(Object obj) {
         Class<?> clazz =  obj.getClass();
         injectFields(obj, clazz);
     }
 
     private  void injectFields(Object obj, Class<?> clazz) {
-        boolean injected = false;
         try {
             Field[] fields = clazz.getDeclaredFields();
             for (Field field : fields) {
@@ -70,33 +75,36 @@ public class Injector {
                 }
                 if (instances.containsKey(field.getType())) {
                     field.set(obj, instances.get(field.getType()));
-                    injected = true;
                 }
             }
         } catch (IllegalAccessException e) {
             e.printStackTrace();
-        }finally {
-            if(injected){
-                //System.out.println("[Hope's Injector<"+this.plugin.getDescription().getName()+">]: "+clazz.getName()+" inject!");
-            }
         }
     }
-
-    @NotSinglethon
+    public static void clearSingletons(){
+        Singleton.clearAll();
+    }
+    @NotSingleton
     private static class Singleton<T extends JavaPlugin>{
-        private static Map<JavaPlugin, Singleton> enumSingleton = Maps.newHashMap();
-        public static <T extends JavaPlugin> Singleton getInstance(T plugin){
+        private static final Map<JavaPlugin, Singleton<? extends JavaPlugin>>  enumSingleton = Maps.newHashMap();
+        public static <T extends JavaPlugin> Singleton<? extends JavaPlugin> getInstance(T plugin){
             if(!enumSingleton.containsKey(plugin)){
-                enumSingleton.put(plugin,new Singleton(plugin));
+                enumSingleton.put(plugin,new Singleton<JavaPlugin>(plugin));
                 //System.out.println("[Hope's Singleton]: "+plugin.getDescription().getName()+" is register!");
             }
             return enumSingleton.get(plugin);
         }
-        private T plugin;
+        public static <T extends JavaPlugin> void clear(T plugin){
+            enumSingleton.remove(plugin);
+        }
+        static void clearAll(){
+            enumSingleton.clear();
+        }
+        private final T plugin;
         private Singleton(T plugin){
             this.plugin = plugin;
         }
-        private Map<Class,Object> singleton = Maps.newHashMap();
+        private final Map<Class<?>,Object> singleton = Maps.newHashMap();
         private void set(Class<?> clazz, Object instance){
             if(!singleton.containsKey(clazz)){
                 singleton.put(clazz,instance);
@@ -112,6 +120,10 @@ public class Injector {
                 }
             }
             return (O) singleton.get(clazz);
+        }
+
+        public T getPlugin() {
+            return plugin;
         }
     }
 }

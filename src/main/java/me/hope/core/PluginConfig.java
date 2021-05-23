@@ -3,8 +3,6 @@ package me.hope.core;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import me.hope.core.inject.annotation.Inject;
-
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -16,7 +14,6 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 
 
 public class PluginConfig<O extends JavaPlugin> {
@@ -108,10 +105,10 @@ public class PluginConfig<O extends JavaPlugin> {
         }
     }
     public Set<FileConfiguration> getConfigs(){
-        Set<FileConfiguration> configsets = Sets.newHashSet();
+        Set<FileConfiguration> config_sets = Sets.newHashSet();
         for(String configName:configFiles.keySet()){
-            configsets.add(getConfig(configName));
+            config_sets.add(getConfig(configName));
         }
-        return configsets;
+        return config_sets;
     }
 }
