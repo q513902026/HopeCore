@@ -2,10 +2,8 @@ package me.hope.core;
 
 import com.google.common.collect.Maps;
 import me.hope.core.inject.annotation.CommandAlias;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandException;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
+import me.hope.core.inject.annotation.CommandPermission;
+import org.bukkit.command.*;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Map;
@@ -47,6 +45,19 @@ public class PluginCommandMap <O extends JavaPlugin> implements CommandExecutor 
             return false;
         }
     }
+    private <T extends CommandExecutor> boolean checkCommandPermission(Class<T> commandExecutorClazz,CommandSender sender){
+        if (commandExecutorClazz.isAnnotationPresent(CommandPermission.class)){
+            CommandPermission commandPermission = commandExecutorClazz.getAnnotation(CommandPermission.class);
+            if (commandPermission.onlyConsole()){
+                return (sender instanceof ConsoleCommandSender);
+            }else{
+                return sender.hasPermission(commandPermission.value());
+            }
+        }else{
+            return true;
+        }
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         boolean success = false;
@@ -58,13 +69,15 @@ public class PluginCommandMap <O extends JavaPlugin> implements CommandExecutor 
             try {
                 if (args ==null | Objects.requireNonNull(args).length==0){ return true;}
                 for(Map.Entry<String,CommandExecutor> entry : getCommandMap().entrySet()){
-                    if (checkCommandLabel(entry.getValue().getClass(),(label = entry.getKey()),args[0])){
+                    Class<? extends CommandExecutor> commandExecutorClazz = entry.getValue().getClass();
+                    String commandLabel = entry.getKey();
+                    if (checkCommandLabel(commandExecutorClazz,commandLabel,args[0]) & checkCommandPermission(commandExecutorClazz,sender)){
                         String[] new_args = {};
                         if (args.length >1){
                             new_args = new String[args.length - 1];
                             System.arraycopy(args,1,new_args,0, (args.length - 1));
                         }
-                        success = entry.getValue().onCommand(sender,command,label,new_args);
+                        success = entry.getValue().onCommand(sender,command,commandLabel,new_args);
                     }
                 }
             } catch (Throwable var9) {

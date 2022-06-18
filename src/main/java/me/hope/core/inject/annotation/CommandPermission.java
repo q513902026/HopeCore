@@ -7,10 +7,17 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface CommandAlias {
+public @interface CommandPermission {
     /**
-     * 命令的别称
+     * 权限节点
      * @return
      */
-    String[] value();
+    String value();
+
+    /**
+     * 是否仅控制台
+     * @return
+     */
+    boolean onlyConsole() default false;
+
 }
