@@ -7,6 +7,7 @@ import me.hope.core.inject.annotation.NotSingleton;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Map;
 
 @NotSingleton
@@ -46,7 +47,15 @@ public class Injector {
         return singleton.get(clazz);
     }
 
-    public  void injectClasses(){
+    public void injectClasses(){
+        injectClasses(true);
+    }
+
+    /**
+     * 注入实例
+     * @param isInit 当初始化时只注入静态变量
+     */
+    public  void injectClasses(boolean isInit){
         //System.out.println("[Hope's Singleton<"+this.plugin.getDescription().getName()+">]:me.hope.core injector!");
         for(Class<?> clazz : InjectFinder.getClasses(HopeCore.instance,"me.hope.core",true)){
             //System.out.println("[Hope's Singleton<"+this.plugin.getDescription().getName()+">]: <"+clazz.getName()+"> try injectField!");
@@ -55,20 +64,22 @@ public class Injector {
         //System.out.println("[Hope's Singleton<"+this.plugin.getDescription().getName()+">]:"+handlerPath+" injector!");
         for(Class<?> clazz :InjectFinder.getClasses(plugin,handlerPath,true)){
             //System.out.println("[Hope's Singleton<"+this.plugin.getDescription().getName()+">]: <"+clazz.getName()+"> try injectField!");
-            inject(clazz);
+            if (isInit){
+                inject(clazz);
+            }else{
+                inject(getSingleton(clazz));
+            }
         }
     }
-    public  void inject(Class<?> clazz){
-        Object instance = getSingleton(clazz);
-        injectFields(instance,clazz);
+    public void inject(Class<?> clazz){
+        injectStaticFields(clazz);
     }
 
     public  void inject(Object obj) {
         Class<?> clazz =  obj.getClass();
         injectFields(obj, clazz);
     }
-
-    private  void injectFields(Object obj, Class<?> clazz) {
+    private void injectStaticFields(Class<?> clazz){
         try {
             Field[] fields = clazz.getDeclaredFields();
             for (Field field : fields) {
@@ -78,7 +89,28 @@ public class Injector {
                 if (!field.isAccessible()) {
                     field.setAccessible(true);
                 }
-                if (instances.containsKey(field.getType())) {
+                if (Modifier.isStatic(field.getModifiers())){  // IF STATIC FIELD
+                    field.set(null,instances.get(field.getType()));
+                }
+            }
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+    private  void injectFields(Object obj, Class<?> clazz) {
+        try {
+            Field[] fields = clazz.getDeclaredFields();
+            for (Field field : fields) {
+                if (!field.isAnnotationPresent(Inject.class)) {
+                    continue;
+                }
+                //System.out.println("[Hope's Singleton<"+this.plugin.getDescription().getName()+">]:<"+clazz.getName()+ "><"+field.getName()+"> try inject!");
+                if (!field.isAccessible()) {
+                    field.setAccessible(true);
+                }
+                if (Modifier.isStatic(field.getModifiers())){  // IF STATIC FIELD
+                    field.set(null,instances.get(field.getType()));
+                } else if (instances.containsKey(field.getType())) {
                     field.set(obj, instances.get(field.getType()));
                 }
             }
