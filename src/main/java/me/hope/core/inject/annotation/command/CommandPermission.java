@@ -1,4 +1,6 @@
-package me.hope.core.inject.annotation;
+package me.hope.core.inject.annotation.command;
+
+import me.hope.core.CommandType;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -18,6 +20,6 @@ public @interface CommandPermission {
      * 是否仅控制台
      * @return
      */
-    boolean onlyConsole() default false;
+    CommandType type() default CommandType.ALL;
 
 }

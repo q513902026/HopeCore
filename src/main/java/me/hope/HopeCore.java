@@ -16,7 +16,7 @@ public class HopeCore extends JavaPlugin {
 
         getLogger().info("正在清除全部缓存");
 
-        Injector injector = new InjectorBuilder().setDefaultPath("me.hope.core").setPlugin(this).build();
+        Injector injector = new InjectorBuilder().setDefaultPath("me.hope").setPlugin(this).build();
         instance = injector.register(HopeCore.class,this);
         logger = injector.register(Logger.class,getLogger());
 

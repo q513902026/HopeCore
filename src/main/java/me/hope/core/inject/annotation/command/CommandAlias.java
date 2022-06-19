@@ -1,4 +1,4 @@
-package me.hope.core.inject.annotation;
+package me.hope.core.inject.annotation.command;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

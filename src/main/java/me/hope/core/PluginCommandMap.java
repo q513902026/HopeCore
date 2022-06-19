@@ -1,13 +1,14 @@
 package me.hope.core;
 
 import com.google.common.collect.Maps;
-import me.hope.core.inject.annotation.CommandAlias;
-import me.hope.core.inject.annotation.CommandPermission;
+import me.hope.core.inject.annotation.command.CommandAlias;
+import me.hope.core.inject.annotation.command.CommandPermission;
 import org.bukkit.command.*;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 
 public class PluginCommandMap <O extends JavaPlugin> implements CommandExecutor {
     private final O instance;
@@ -25,7 +26,11 @@ public class PluginCommandMap <O extends JavaPlugin> implements CommandExecutor 
     public  <T extends CommandExecutor> T registerCommand(String name, T command) {
         return (T) commands.put(name, command);
     }
-
+    public <T extends CommandExecutor> void registerCommands(Map<String,Class<? extends T>> commandMap, Function<Class<? extends T>, T> loadFunction){
+        for (Map.Entry<String, Class<? extends T>> classEntry : commandMap.entrySet()) {
+            registerCommand(classEntry.getKey(),loadFunction.apply(classEntry.getValue()));
+        }
+    }
     public Map<String, CommandExecutor> getCommandMap() {
         return commands;
     }
@@ -48,10 +53,10 @@ public class PluginCommandMap <O extends JavaPlugin> implements CommandExecutor 
     private <T extends CommandExecutor> boolean checkCommandPermission(Class<T> commandExecutorClazz,CommandSender sender){
         if (commandExecutorClazz.isAnnotationPresent(CommandPermission.class)){
             CommandPermission commandPermission = commandExecutorClazz.getAnnotation(CommandPermission.class);
-            if (commandPermission.onlyConsole()){
-                return (sender instanceof ConsoleCommandSender);
-            }else{
+            if (commandPermission.type() == CommandType.ALL){
                 return sender.hasPermission(commandPermission.value());
+            }else{
+                return commandPermission.type().canPass(sender);
             }
         }else{
             return true;
